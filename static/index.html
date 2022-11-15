@@ -15,8 +15,8 @@
     <link rel="stylesheet" href="spinner.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.2/pixi.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi-viewport@4.2.3/dist/viewport.min.js"></script>
-    <link rel="stylesheet" href="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
-    <script src="http://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="Point.js"></script>
     <script src="utils.js"></script>
 </head>
@@ -62,7 +62,7 @@
                     <button class="btn btn-primary" id="start-btn" disabled="true">Start</button>
                 </div-->
 
-                <form>
+                <div>
                     <label for="roadnet">Select roadnet</label>
                     <select class="form-select" id="roadnet">
                         <option value="1">One</option>
@@ -78,9 +78,9 @@
                     </select>
                     
                     <div class="col-12 mt-3">
-                        <button class="btn btn-primary" id="start-btn">Start</button>
+                        <button class="btn btn-primary" id="start-btn" submit="false">Start</button>
                     </div>
-                </form>
+                </div>
             </div>
             <!--div id="file-upload" class="border-dark">
                 <div class="custom-file mb-3">

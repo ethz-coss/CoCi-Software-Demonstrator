@@ -137,30 +137,57 @@ function uploadFile(v, file, callback) {
     }
 }
 
+async function downloadRoadnetFile(v, temp, callback) {
+    console.log("downloading roadnet");
+    v[0] = await getRoadnetFile(roadnetSelect.value);
+    console.log("finished downloading roadnet");
+    callback();
+    // getRoadnetFile("NY48").then((blob) => {
+    //     v[0] = blob;
+    //     infoAppend("Roadnet file loaded");
+    //     callback();
+    // })
+}
+
+async function downloadReplayFile(v, temp, callback) {
+    console.log("downloading replay");
+    v[0] = await getReplayFile(roadnetSelect.value, replaySelect.value);
+    console.log("finished downloading replay");
+    callback();
+    // getReplayFile("NY48", "double_analytic").then((blob) => {
+    //     v[0] = blob;
+    //     infoAppend("Replay file loaded");
+    //     callback();
+    // })
+}
+
 let debugMode = false;
 let chartLog;
 let showChart = false;
 let chartConainterDOM = document.getElementById("chart-container");
-function start() {
+async function start() {
     if (loading) return;
     loading = true;
     infoReset();
-    uploadFile(roadnetData, RoadnetFileDom.files[0], function(){
-    uploadFile(replayData, ReplayFileDom.files[0], function(){
+    console.log("after info reset");
+    await downloadRoadnetFile(roadnetData, "", async function(){
+    await downloadReplayFile(replayData, "", function(){
         let after_update = function() {
             infoAppend("drawing roadnet");
             ready = false;
             document.getElementById("guide").classList.add("d-none");
             hideCanvas();
             try {
-                simulation = JSON.parse(roadnetData[0]);
+                simulation = (roadnetData[0]);
             } catch (e) {
                 infoAppend("Parsing roadnet file failed");
                 loading = false;
                 return;
             }
             try {
+                //console.log(replayData[0]);
                 logs = replayData[0].split('\n');
+                console.log("length", logs.length);
                 logs.pop();
             } catch (e) {
                 infoAppend("Reading replay file failed");
@@ -191,7 +218,8 @@ function start() {
 
             controls.paused = false;
             cnt = 0;
-            debugMode = document.getElementById("debug-mode").checked;
+            //debugMode = document.getElementById("debug-mode").checked;
+            debugMode = false
             setTimeout(function () {
                 try {
                     drawRoadnet();
@@ -208,7 +236,7 @@ function start() {
         };
 
 
-        if (ChartFileDom.value) {
+        if (false && ChartFileDom.value) {
             showChart = true;
             uploadFile(chartData, ChartFileDom.files[0], after_update);
         } else {
@@ -224,14 +252,37 @@ let RoadnetFileDom = document.getElementById("roadnet-file");
 let ReplayFileDom = document.getElementById("replay-file");
 let ChartFileDom = document.getElementById("chart-file");
 
+let roadnetSelect = document.getElementById("roadnet");
+let replaySelect = document.getElementById("flow");
 
+function clearSelect(selectElem) {
+    while(selectElem.options.length) {
+        selectElem.remove(0);
+    }
+}
+clearSelect(roadnetSelect);
+//clearSelect(replaySelect);
 
-RoadnetFileDom.addEventListener("change",
+let roadnetCallback = (data) => {
+    data.forEach((opt) => roadnetSelect.add(new Option(opt, opt)))
+    return data[0]
+}
+
+let repalyCallback = (data) => {
+    clearSelect(replaySelect);
+    data.forEach((opt) => replaySelect.add(new Option(opt, opt)))
+}
+
+getRoadnetOptions(roadnetCallback).then((opt) => getReplayOptions(opt, repalyCallback));
+
+roadnetSelect.addEventListener('change', (event) => getReplayOptions(event.target.value, repalyCallback));
+
+/*RoadnetFileDom.addEventListener("change",
     handleChooseFile(roadnetData, document.getElementById("roadnet-label")), false);
 ReplayFileDom.addEventListener("change",
     handleChooseFile(replayData, document.getElementById("replay-label")), false);
 ChartFileDom.addEventListener("change",
-    handleChooseFile(chartData, document.getElementById("chart-label")), false);
+    handleChooseFile(chartData, document.getElementById("chart-label")), false);*/
 
 document.getElementById("start-btn").addEventListener("click", start);
 
