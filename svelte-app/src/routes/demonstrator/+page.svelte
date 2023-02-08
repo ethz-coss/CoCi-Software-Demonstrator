@@ -1,6 +1,7 @@
 <script lang="ts">
     import Simulator from "./simulator.svelte";
     import Controller from "./controller.svelte";
+    import Viewport from 'svelte-viewport-info';
     import {controls, selectedParams, globalCount} from "./stores";
     const P = 80;
     const LEFT_BRACKET = 219, RIGHT_BRACKET = 221; 
@@ -16,12 +17,15 @@
             $globalCount = ($globalCount + 1) % 3600;
         }
     }
+    let screenHeight = Viewport.Height - 50;
+    let halfScreenHeight = Math.ceil(screenHeight/2);
+    console.log("screenHeight", screenHeight);
 </script>
 <svelte:window on:keydown={handleKeydown}/>
 
-<div class="container-fluid w-100 h-100 pt-0 pb-0">
-    <div class="row h-100">
-        <div class="col-2 pt-4 shadow-lg mr-0 status-panel ">
+<div class="container-fluid pt-0 pb-0">
+    <div class="row vh-100">
+        <div class="col-2 pt-4 shadow-lg mr-0 status-panel h-100 noscrollbar" style="overflow-y: scroll;">
             <!-- <i class="fas fa-car h2"></i> -->
             <h2 class="pb-3 border-bottom">CoCi Demonstrator</h2>
             <table class="table table-borderless table-hover border-bottom">
@@ -54,16 +58,16 @@
             </table>
             <Controller/>
         </div>
-        <div class="col-10">
+        <div class="col-10 h-100" style="overflow-y: scroll;">
             {#each $selectedParams as _,i}
                 <!-- <Simulator id={i}/> -->
                 {#if i%2 == 0}
                     <div class="row {$selectedParams.length > 2 ? "h-50": "h-100"}">
-                        <div class="col"> 
+                        <div class="col" style="height: {$selectedParams.length > 2 ? halfScreenHeight : screenHeight}px;"> 
                             <Simulator id={i}/> 
                         </div>
                         {#if i+1 < $selectedParams.length}
-                            <div class="col"> <Simulator id={i+1}/> </div>
+                            <div class="col" style="height: {$selectedParams.length > 2 ? halfScreenHeight : screenHeight}px;"> <Simulator id={i+1}/> </div>
                         {/if}
                     </div>
                 {/if}
@@ -78,4 +82,10 @@
     min-height: 100vh;
     /*overflow-y: auto; */
 }
+
+.noscrollbar::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
 </style>
