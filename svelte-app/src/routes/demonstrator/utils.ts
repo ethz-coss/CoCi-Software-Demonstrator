@@ -1,5 +1,5 @@
-//const SERVER_URL = "http://127.0.0.1:8134";
-const SERVER_URL = "/api";
+const SERVER_URL = "http://127.0.0.1:8134";
+//const SERVER_URL = "/api";
 
 let roadnetOptions: string[];
 let replayOptions = {};

@@ -1,42 +1,45 @@
 /**
  * Draw Road Network
  */
-id = Math.random().toString(36).substring(2, 15);
+import { Gradient } from "./color-gradient.js";
 
-BACKGROUND_COLOR = 0xe8ebed;
-LANE_COLOR = 0x586970;
-LANE_BORDER_WIDTH = 1;
-LANE_BORDER_COLOR = 0x82a8ba;
-LANE_INNER_COLOR = 0xbed8e8;
-LANE_DASH = 10;
-LANE_GAP = 12;
-TRAFFIC_LIGHT_WIDTH = 3;
-MAX_TRAFFIC_LIGHT_NUM = 100000;
-ROTATE = 90;
+const id = Math.random().toString(36).substring(2, 15);
 
-CAR_LENGTH = 5;
-CAR_WIDTH = 2;
-CAR_COLOR = 0xe8bed4;
+const BACKGROUND_COLOR = 0xe8ebed;
+const LANE_COLOR = 0x586970;
+const LANE_BORDER_WIDTH = 1;
+const LANE_BORDER_COLOR = 0x82a8ba;
+const LANE_INNER_COLOR = 0xbed8e8;
+const LANE_DASH = 10;
+const LANE_GAP = 12;
+const TRAFFIC_LIGHT_WIDTH = 3;
+const MAX_TRAFFIC_LIGHT_NUM = 100000;
+const ROTATE = 90;
 
-CAR_COLORS = [0xf2bfd7, // pink
+const CAR_LENGTH = 5;
+const CAR_WIDTH = 2;
+const CAR_COLOR = 0xe8bed4;
+
+const CAR_COLORS = [0xf2bfd7, // pink
             0xb7ebe4,   // cyan
             0xdbebb7,   // blue
             0xf5ddb5, 
             0xd4b5f5];
-CAR_COLORS_NUM = CAR_COLORS.length;
+const CAR_COLORS_NUM = CAR_COLORS.length;
 
-NUM_CAR_POOL = 150000;
+const NUM_CAR_POOL = 150000;
 
-LIGHT_RED = 0xdb635e;
-LIGHT_GREEN = 0x85ee00;
+const LIGHT_RED = 0xdb635e;
+const LIGHT_GREEN = 0x85ee00;
 
-TURN_SIGNAL_COLOR = 0xFFFFFF;
-TURN_SIGNAL_WIDTH   = 1;
-TURN_SIGNAL_LENGTH  = 5;
+const TURN_SIGNAL_COLOR = 0xFFFFFF;
+let TURN_SIGNAL_WIDTH   = 1;
+let TURN_SIGNAL_LENGTH  = 5;
 
 var simulation, roadnet, steps;
 var nodes = {};
 var edges = {};
+let edges_copy 
 var logs;
 var gettingLog = false;
 
@@ -91,7 +94,6 @@ let replaySpeedDom = document.getElementById("replay-speed");
 let loading = false;
 let infoDOM = document.getElementById("info");
 let selectedDOM = document.getElementById("selected-entity");
-
 function infoAppend(msg) {
     infoDOM.innerText += "- " + msg + "\n";
 }
@@ -99,6 +101,12 @@ function infoAppend(msg) {
 function infoReset() {
     infoDOM.innerText = "";
 }
+
+
+const gradientArray = new Gradient()
+  .setColorGradient("#00FFFF", "#00FF00", "#FFFF00", "#FF0000")
+  .setMidpoint(100)
+  .getColors();
 
 /**
  * Upload files
@@ -133,14 +141,16 @@ function uploadFile(v, file, callback) {
         reader.readAsText(file);
     } catch (e) {
         infoAppend("Loading failed");
-        console.error(e.message);
+        console.log(e);
     }
 }
 
 async function downloadRoadnetFile(v, temp, callback) {
-    console.log("downloading roadnet");
+    infoAppend("Downloading roadnet..");
+    hideCanvas();
     v[0] = await getRoadnetFile(roadnetSelect.value);
-    console.log("finished downloading roadnet");
+    infoAppend("Finished downloading roadnet!");
+    showCanvas();
     callback();
     // getRoadnetFile("NY48").then((blob) => {
     //     v[0] = blob;
@@ -150,9 +160,11 @@ async function downloadRoadnetFile(v, temp, callback) {
 }
 
 async function downloadReplayFile(v, temp, callback) {
-    console.log("downloading replay");
+    infoAppend("Downloading replay..");
+    hideCanvas();
     v[0] = await getReplayFile(roadnetSelect.value, replaySelect.value);
-    console.log("finished downloading replay");
+    infoAppend("Finished downloading replay!");
+    showCanvas();
     callback();
     // getReplayFile("NY48", "double_analytic").then((blob) => {
     //     v[0] = blob;
@@ -169,11 +181,10 @@ async function start() {
     if (loading) return;
     loading = true;
     infoReset();
-    console.log("after info reset");
     await downloadRoadnetFile(roadnetData, "", async function(){
     await downloadReplayFile(replayData, "", function(){
         let after_update = function() {
-            infoAppend("drawing roadnet");
+            infoAppend("Drawing roadnet");
             ready = false;
             document.getElementById("guide").classList.add("d-none");
             hideCanvas();
@@ -187,7 +198,7 @@ async function start() {
             try {
                 //console.log(replayData[0]);
                 logs = replayData[0].split('\n');
-                console.log("length", logs.length);
+                console.log("length replay log: ", logs.length);
                 logs.pop();
             } catch (e) {
                 infoAppend("Reading replay file failed");
@@ -218,14 +229,13 @@ async function start() {
 
             controls.paused = false;
             cnt = 0;
-            //debugMode = document.getElementById("debug-mode").checked;
-            debugMode = false
+            debugMode = document.getElementById("debug-mode").checked;
             setTimeout(function () {
                 try {
                     drawRoadnet();
                 } catch (e) {
                     infoAppend("Drawing roadnet failed");
-                    console.error(e.message);
+                    console.error(e);
                     loading = false;
                     return;
                 }
@@ -391,13 +401,13 @@ function drawRoadnet() {
     trafficLightsG = {};
 
     for (let i = 0, len = roadnet.nodes.length;i < len;++i) {
-        node = roadnet.nodes[i];
+        let node = roadnet.nodes[i];
         node.point = new Point(transCoord(node.point));
         nodes[node.id] = node;
     }
 
     for (let i = 0, len = roadnet.edges.length;i < len;++i) {
-        edge = roadnet.edges[i];
+        let edge = roadnet.edges[i];
         edge.from = nodes[edge.from];
         edge.to = nodes[edge.to];
         for (let j = 0, len = edge.points.length;j < len;++j) {
@@ -405,7 +415,8 @@ function drawRoadnet() {
         }
         edges[edge.id] = edge;
     }
-
+    edges_copy = structuredClone(edges)
+    console.log("in drawRoadnet: ", edges, edges_copy)
     /**
      * Draw Map
      */
@@ -419,7 +430,7 @@ function drawRoadnet() {
         simulatorContainer.addChild(mapGraphics);
     }
 
-    for (nodeId in nodes) {
+    for (let nodeId in nodes) {
         if (!nodes[nodeId].virtual) {
             let nodeGraphics;
             if (debugMode) {
@@ -431,14 +442,17 @@ function drawRoadnet() {
             drawNode(nodes[nodeId], nodeGraphics);
         }
     }
-    for (edgeId in edges) {
+    for (let edgeId in edges) {
         let edgeGraphics;
         if (debugMode) {
             edgeGraphics = new Graphics();
+            console.log(edgeId)
+            edgeGraphics.name = edgeId
             mapContainer.addChild(edgeGraphics);
         } else {
             edgeGraphics = mapGraphics;
         }
+        edgeGraphics.name = edgeId
         drawEdge(edges[edgeId], edgeGraphics);
     }
     let bounds = simulatorContainer.getBounds();
@@ -569,7 +583,6 @@ function drawNode(node, graphics) {
             graphics.lineTo(outline[i], outline[i+1]);
     }
     graphics.endFill();
-
     if (debugMode) {
         graphics.hitArea = new PIXI.Polygon(outline);
         graphics.interactive = true;
@@ -584,7 +597,7 @@ function drawNode(node, graphics) {
 
 }
 
-function drawEdge(edge, graphics) {
+function drawEdge(edge, graphics, lane_color=LANE_COLOR) {
     let from = edge.from;
     let to = edge.to;
     let points = edge.points;
@@ -616,21 +629,22 @@ function drawEdge(edge, graphics) {
         }
         prevPointBOffset = pointBOffset;
 
-        lightG = new Graphics();
+        let lightG = new Graphics();
         lightG.lineStyle(TRAFFIC_LIGHT_WIDTH, 0xFFFFFF);
         lightG.drawLine(new Point(0, 0), new Point(1, 0));
-        lightTexture = renderer.generateTexture(lightG);
+        let lightTexture = renderer.generateTexture(lightG);
 
         // Draw Traffic Lights
         if (i == points.length-1 && !to.virtual) {
-            edgeTrafficLights = [];
-            prevOffset = offset = 0;
-            for (lane = 0;lane < edge.nLane;++lane) {
+            let edgeTrafficLights = [];
+            let prevOffset = 0;
+            let offset = 0;
+            for (let lane = 0;lane < edge.nLane;++lane) {
                 offset += edge.laneWidths[lane];
                 var light = new Sprite(lightTexture);
                 light.anchor.set(0, 0.5);
                 light.scale.set(offset - prevOffset, 1);
-                point_ = pointB.moveAlong(pointBOffset, prevOffset);
+                let point_ = pointB.moveAlong(pointBOffset, prevOffset);
                 light.position.set(point_.x, point_.y);
                 light.rotation = pointBOffset.getAngleInRadians();
                 edgeTrafficLights.push(light);
@@ -644,11 +658,11 @@ function drawEdge(edge, graphics) {
         graphics.lineStyle(LANE_BORDER_WIDTH, LANE_BORDER_COLOR, 1);
         graphics.drawLine(pointA, pointB);
 
-        pointA1 = pointA.moveAlong(pointAOffset, roadWidth);
-        pointB1 = pointB.moveAlong(pointBOffset, roadWidth);
+        let pointA1 = pointA.moveAlong(pointAOffset, roadWidth);
+        let pointB1 = pointB.moveAlong(pointBOffset, roadWidth);
 
         graphics.lineStyle(0);
-        graphics.beginFill(LANE_COLOR);
+        graphics.beginFill(lane_color);
 
         coords = coords.concat([pointA.x, pointA.y, pointB.x, pointB.y]);
         coords1 = coords1.concat([pointA1.y, pointA1.x, pointB1.y, pointB1.x]);
@@ -656,7 +670,7 @@ function drawEdge(edge, graphics) {
         graphics.drawPolygon([pointA.x, pointA.y, pointB.x, pointB.y, pointB1.x, pointB1.y, pointA1.x, pointA1.y]);
         graphics.endFill();
 
-        offset = 0;
+        let offset = 0;
         for (let lane = 0, len = edge.nLane-1;lane < len;++lane) {
             offset += edge.laneWidths[lane];
             graphics.lineStyle(LANE_BORDER_WIDTH, LANE_INNER_COLOR);
@@ -691,6 +705,7 @@ function run(delta) {
         try {
             drawStep(cnt);
         }catch (e) {
+            console.log(e)
             infoAppend("Error occurred when drawing");
             ready = false;
         }
@@ -758,10 +773,22 @@ function drawStep(step) {
 
     carContainer.removeChildren();
     turnSignalContainer.removeChildren();
+
+    let roadToNumCars = {}
     let carLog, position, length, width;
     for (let i = 0, len = carLogs.length - 1;i < len;++i) {
         carLog = carLogs[i].split(' ');
         position = transCoord([parseFloat(carLog[0]), parseFloat(carLog[1])]);
+        if(debugMode && step>0 && step%20 ==0) {
+            let roadId = getRoadIdOfCar(position)
+            if(roadId != null) {
+                if(roadToNumCars[roadId] != undefined) {
+                    roadToNumCars[roadId]++
+                } else {
+                    roadToNumCars[roadId]=0
+                }
+            }
+        }
         length = parseFloat(carLog[5]);
         width = parseFloat(carLog[6]);
         carPool[i][0].position.set(position[0], position[1]);
@@ -781,6 +808,28 @@ function drawStep(step) {
         carPool[i][1].height = width;
         turnSignalContainer.addChild(carPool[i][1]);
     }
+
+    if (debugMode && step>0 && step%20==0) {
+        //console.log("children", simulatorContainer.children)
+        //console.log("childByName", simulatorContainer.children[2].getChildByName("flow_5_3", true))
+        //console.log("childByNameRoad", simulatorContainer.children[0].getChildByName("road_2_1_1", true))
+        console.log("roadToNumCars", roadToNumCars)
+        for (let roadId in roadToNumCars) {
+            let road = simulatorContainer.children[0].getChildByName(roadId, true)
+            if (road) {
+                console.log("#cars_on_road, #roads, #cars", roadToNumCars[roadId], Object.keys(roadToNumCars).length, carLogs.length)
+                let index = Math.ceil(roadToNumCars[roadId] * Object.keys(roadToNumCars).length * 100 / carLogs.length)
+                if (index > 99) index = 99
+                if (index < 0) index = 0
+                console.log("index", index)
+                road.tint = parseInt(gradientArray[index].slice(1), 16)
+            }
+            // if (roadToNumCars[roadId] > 50) road.tint = 0xFF0000
+            // if (roadToNumCars[roadId] > 20 && roadToNumCars[roadId] <= 50) road.tint = 0x0000FF
+            // if (roadToNumCars[roadId] > 10 && roadToNumCars[roadId] <= 20) road.tint = 0x00FF00
+        }
+    }
+
     nodeCarNum.innerText = carLogs.length-1;
     nodeTotalStep.innerText = totalStep;
     nodeCurrentStep.innerText = cnt+1;
@@ -789,6 +838,29 @@ function drawStep(step) {
         if (withRange) nodeRange.value = stats[step][1];
         nodeStats.innerText = stats[step][0].toFixed(2);
     }
+}
+
+function getRoadIdOfCar(position) {
+    position = transCoord(position)
+    //console.log("position of car", position)
+    for(let edgeId in edges_copy) {
+        let road = edges_copy[edgeId]
+        for (let i=0; i<road.points.length-1; i++) {
+            let endpoint1 = transCoord([road.points[i].x, road.points[i].y])
+            let endpoint2 = transCoord([road.points[i+1].x, road.points[i+1].y])
+            //console.log("checking if car is in ", endpoint1, "and", endpoint2)
+            let width = 6
+            if(position[0] >= endpoint1[0]-width && position[0] <= endpoint2[0]+width && position[1] >= endpoint1[1]-width && position[1] <= endpoint2[1]+width) {
+                //console.log("found!")
+                return road.id
+            }
+            if(position[0] <= endpoint1[0]+width && position[0] >= endpoint2[0]-width && position[1] <= endpoint1[1]+width && position[1] >= endpoint2[1]-width) {
+                //console.log("found!")
+                return road.id
+            }
+        }
+    }
+    return null
 }
 
 /*

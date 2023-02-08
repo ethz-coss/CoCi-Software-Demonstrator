@@ -241,7 +241,7 @@ function initCanvas() {
 }
 $: {
     if (nodeCanvas && nodeCanvas.offsetHeight) {
-        console.log(`[${id}]: `, nodeCanvas.offsetWidth, nodeCanvas.offsetHeight);
+        console.log(`[${id}]: changed`, nodeCanvas.offsetWidth, nodeCanvas.offsetHeight);
         renderer.resize(nodeCanvas.offsetWidth, nodeCanvas.offsetHeight);
     }
 }
@@ -260,10 +260,13 @@ function drawRoadnet() {
         simulatorContainer.destroy(true);
     }
     renderer.resize(nodeCanvas.offsetWidth, nodeCanvas.offsetHeight);
+    console.log(`[${id}] drawing roadnet: `, nodeCanvas.offsetWidth, nodeCanvas.offsetHeight);
     app.stage.removeChildren();
     viewport = new Viewport.Viewport({
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
+        screenWidth: nodeCanvas.offsetWidth,
+        screenHeight: nodeCanvas.offsetHeight,
+        worldWidth: nodeCanvas.offsetWidth,
+        worldHeight: nodeCanvas.offsetHeight,
         interaction: app.renderer.plugins.interaction
     });
     viewport
@@ -274,7 +277,7 @@ function drawRoadnet() {
     app.stage.addChild(viewport);
     simulatorContainer = new PIXI.Container();
     viewport.addChild(simulatorContainer);
-
+    viewport.setZoom(0.75,true);
     roadnet = simulation.static;
     nodes = [];
     edges = [];
@@ -748,7 +751,7 @@ Chart
 </script>
 
 
-<div id="simulator-canvas" class=" h-100" bind:this={nodeCanvas}>
+<div id="simulator-canvas" class="h-100" bind:this={nodeCanvas}>
     <div id="spinner" class="spinner d-none" bind:this={spinnerDomElem}>
         <div class="rect1"></div>
         <div class="rect2"></div>
@@ -845,11 +848,7 @@ Chart
 }
 
 #simulator-canvas {
-    margin: auto;
-    padding: 0;
-    /*max-height: 100%;*/
-    width: 100%;
-    overflow:auto;
+    margin: 0.5em;
 }
 
 </style>

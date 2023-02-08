@@ -19,6 +19,7 @@
     <script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
     <script src="Point.js"></script>
     <script src="utils.js"></script>
+    <!--script src="color-gradient.js"></script-->
 </head>
 
 
@@ -76,6 +77,9 @@
                         <option value="2">Two</option>
                         <option value="3">Three</option>
                     </select>
+
+                    <input type="checkbox" id="debug-mode" checked/>
+                    <label for="debug-mode">Heatmap (Experimental)</label>
                     
                     <div class="col-12 mt-3">
                         <button class="btn btn-primary" id="start-btn" submit="false">Start</button>
@@ -120,13 +124,13 @@
                     </tbody>
                 </table>
                 <div class="row no-gutters">
-                    <div class="col-1 text-center">
+                    <div class="col-2 text-center">
                         <span class="fas fa-minus" id="slow-btn" style="cursor: pointer"></span>
                     </div>
-                    <div class="col-10">
+                    <div class="col-7">
                         <input type="range" class="custom-range" id="replay-control">
                     </div>
-                    <div class="col-1 text-center">
+                    <div class="col-2 text-center">
                         <span class="fas fa-plus" id="fast-btn" style="cursor: pointer"></span>
                     </div>
                 </div>
@@ -191,7 +195,7 @@
 </div>
 
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 
 </html>
