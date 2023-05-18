@@ -3,6 +3,8 @@
     import Controller from "./controller.svelte";
     import Viewport from 'svelte-viewport-info';
     import {controls, selectedParams, globalCount} from "./stores";
+    import Navbar from "../navbar.svelte";
+    import Footer from "../footer.svelte"
     const P = 80;
     const LEFT_BRACKET = 219, RIGHT_BRACKET = 221; 
     let progressPercentage, selectedEntity;
@@ -23,6 +25,8 @@
 </script>
 <svelte:window on:keydown={handleKeydown}/>
 
+<Navbar />
+<main class="flex-shrink-0">
 <div class="container-fluid pt-0 pb-0">
     <div class="row vh-100">
         <div class="col-2 pt-4 shadow-lg mr-0 status-panel h-100 noscrollbar" style="overflow-y: scroll;">
@@ -75,7 +79,7 @@
         </div>
     </div>
 </div>
-
+</main>
 <style>
 .status-panel {
     z-index: 3;
