@@ -33,7 +33,7 @@
         let replayOptions = await utils.getReplayOptions(roadnetOptions[0]);
         roadnetOptionsList = [...roadnetOptionsList, roadnetOptions];
         replayOptionsForRoadnetOptionList = [...replayOptionsForRoadnetOptionList, replayOptions];
-        $selectedParams = [...$selectedParams, {roadnetOption: roadnetOptions[0], replayOption: replayOptions[0]}]
+        $selectedParams = [...$selectedParams, {roadnetOption: roadnetOptions[0], replayOption: replayOptions[replayOptions.length-1]}]
         console.log($selectedParams, $debugMode)
     }
 
@@ -85,7 +85,7 @@
     async function onRoadnetOptionChange(i: number) {
         let replayOptions = await utils.getReplayOptions($selectedParams[i].roadnetOption);
         replayOptionsForRoadnetOptionList[i] = replayOptions;
-        $selectedParams[i].replayOption = replayOptions[0];
+        $selectedParams[i].replayOption = replayOptions[replayOptions.length-1];
     } 
 </script>
 
@@ -94,7 +94,7 @@
     <div>
         {#each roadnetOptionsList as _,i}
         <div class="border-bottom pb-2">
-            <label for="roadnet">Select roadnet</label>
+            <label for="roadnet">Select Scenario</label>
 
             <select class="form-select" id="roadnet" bind:value={$selectedParams[i].roadnetOption} on:change={() => onRoadnetOptionChange(i)}>
                 {#each roadnetOptionsList[i] as opt}
@@ -102,10 +102,10 @@
                 {/each}
             </select>
             
-            <label for="flow">Select flow</label>
+            <label for="flow">Select Method</label>
             <select class="form-select" id="flow" bind:value={$selectedParams[i].replayOption}>
                 {#each replayOptionsForRoadnetOptionList[i] as opt}
-                    <option value={opt}>{opt}</option>
+                    <option value={opt} disabled={['GuidedLight', 'PressLight', 'Analytic+', 'Demand', 'Fixed'].includes(opt)}>{opt}</option>
                 {/each}
             </select>
         </div>
