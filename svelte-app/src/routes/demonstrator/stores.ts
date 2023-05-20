@@ -16,6 +16,8 @@ export let infoDOM = writable({innerText:''});
 
 export let startSimulation = writable(false);
 
+export let selectedEntity = writable('')
+
 function createGlobalCount() {
     const { subscribe, set, update } = writable(0);
     let arriveCount = 0;

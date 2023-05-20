@@ -2,24 +2,39 @@
 class Data:
     def __init__(self):
         self.roadnet_options = {
-            'NY48' : 'ny48_roadnet_log.json',
-            'Hangzhou': 'hangzhou_roadnet_log.json',
+            '2x2': '2x2_roadnetLogFile.json',
             '4x4': '4x4_roadnetLogFile.json',
-            '2x2': '2x2_roadnetLogFile.json'
+            'Hangzhou': 'hangzhou_roadnet_log.json',
+            'NY48' : 'ny48_roadnet_log.json'
         }
         self.replay_options = {
             'NY48': {
-                'double_analytic': '1_ny48double_analytic.txt', 
-                'triple_analytic': '1_ny48triple_analytic.txt'
+                'GuidedLight': 'ny48_hybrid.txt',
+                'PressLight' : 'ny48_presslight.txt',
+                'Analytic+' : 'ny48_analytical.txt',
+                'Demand' : 'ny48_demand.txt',
+                'Fixed' : 'ny48_fixed.txt'
             },
             'Hangzhou': {
-                'default': '1_hangzhou_analytic.txt'
+                'GuidedLight': 'hangzhou_hybrid.txt',
+                'PressLight' : 'hangzhou_presslight.txt',
+                'Analytic+' : 'hangzhou_analytical.txt',
+                'Demand' : 'hangzhou_demand.txt',
+                'Fixed' : 'hangzhou_fixed.txt'
             },
             '4x4': {
-                'default': '1_4x4_analytic.txt'
+                'GuidedLight': '4x4_hybrid.txt',
+                'PressLight' : '4x4_presslight.txt',
+                'Analytic+' : '4x4_analytical.txt',
+                'Demand' : '4x4_demand.txt',
+                'Fixed' : '4x4_fixed.txt'
             },
             '2x2': {
-                'default': '1_2x2_analytic.txt'
+                'GuidedLight': '2x2_hybrid.txt',
+                'PressLight' : '2x2_presslight.txt',
+                'Analytic+' : '2x2_analytical.txt',
+                'Demand' : '2x2_demand.txt',
+                'Fixed' : '2x2_fixed.txt'
             }
         }
     

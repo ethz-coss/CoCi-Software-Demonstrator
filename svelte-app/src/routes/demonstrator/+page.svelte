@@ -2,12 +2,11 @@
     import Simulator from "./simulator.svelte";
     import Controller from "./controller.svelte";
     import Viewport from 'svelte-viewport-info';
-    import {controls, selectedParams, globalCount} from "./stores";
+    import {controls, selectedParams, globalCount, debugMode, startSimulation, selectedEntity} from "./stores";
     import Navbar from "../navbar.svelte";
-    import Footer from "../footer.svelte"
     const P = 80;
     const LEFT_BRACKET = 219, RIGHT_BRACKET = 221; 
-    let progressPercentage, selectedEntity;
+    let progressPercentage;
     function handleKeydown(e) {
         if (e.keyCode == P) {
             $controls.paused = !$controls.paused;
@@ -31,7 +30,7 @@
     <div class="row vh-100">
         <div class="col-2 pt-4 shadow-lg mr-0 status-panel h-100 noscrollbar" style="overflow-y: scroll;">
             <!-- <i class="fas fa-car h2"></i> -->
-            <h2 class="pb-3 border-bottom">CoCi Demonstrator</h2>
+            <h3 class="pb-3 border-bottom">CoCi Demonstrator</h3>
             <table class="table table-borderless table-hover border-bottom">
                 <tbody>
                 <tr class="d-none">
@@ -56,7 +55,7 @@
                 </tr>
                 <tr>
                     <th scope="row" class="pl-0">Selected</th>
-                    <td class="text-right" id="selected-entity">{selectedEntity}</td>
+                    <td class="text-right" id="selected-entity">{$selectedEntity}</td>
                 </tr>
                 </tbody>
             </table>
@@ -79,6 +78,11 @@
         </div>
     </div>
 </div>
+
+<div id="gradient-container" class:d-none={!$debugMode || false}>
+    Density
+    <div id="gradient-legend"></div>
+</div>
 </main>
 <style>
 .status-panel {
@@ -92,4 +96,20 @@
     background: transparent;
 }
 
+#gradient-container {
+    width: 200px;
+    position: fixed;
+    z-index: 1000;
+    right:10px;
+    bottom:25px;
+}
+#gradient-legend {
+    background: linear-gradient(90deg, #00FFFF, #00FF00, #FFFF00, #FF0000);
+    height: 15px;
+    width: 200px;
+    position: fixed;
+    z-index: 1000;
+    right:10px;
+    bottom:10px;
+}
 </style>

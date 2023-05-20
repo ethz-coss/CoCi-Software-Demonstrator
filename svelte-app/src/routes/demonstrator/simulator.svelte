@@ -5,7 +5,7 @@ import * as PIXI from 'pixi.js-legacy';
 import * as Viewport from 'pixi-viewport'
 import {onMount} from 'svelte';
 import * as utils from './utils.js';
-import {selectedParams, debugMode, controls, infoDOM, startSimulation, globalCount} from './stores';
+import {selectedParams, debugMode, controls, infoDOM, startSimulation, globalCount, selectedEntity} from './stores';
 
 export let id: number;
 
@@ -80,7 +80,6 @@ let spinnerDomElem: HTMLDivElement;
 
 
 let loading = false;
-let selectedEntity = '';
 function infoAppend(msg:string) {
     $infoDOM.innerText += "- " + msg + "\n";
 }
@@ -386,7 +385,7 @@ function drawRoadnet() {
         if ($debugMode) {
             car.interactive = true;
             car.on('mouseover', function () {
-                selectedEntity = car.name;
+                $selectedEntity = car.name;
                 car.alpha = 0.8;
             });
             car.on('mouseout', function () {
@@ -445,7 +444,8 @@ PIXI.Graphics.prototype.drawDashLine = function(pointA, pointB, dash = 16, gap =
 };
 
 function drawNode(node, graphics) {
-    graphics.beginFill(LANE_COLOR);
+    if($debugMode) graphics.beginFill(LANE_COLOR,0.6);
+    else graphics.beginFill(LANE_COLOR);
     let outline = node.outline;
     for (let i = 0 ; i < outline.length ; i+=2) {
         outline[i+1] = -outline[i+1];
@@ -459,7 +459,7 @@ function drawNode(node, graphics) {
         graphics.hitArea = new PIXI.Polygon(outline);
         graphics.interactive = true;
         graphics.on("mouseover", function () {
-            selectedEntity = node.id;
+            $selectedEntity = node.id;
             graphics.alpha = 0.5;
         });
         graphics.on("mouseout", function () {
@@ -535,7 +535,8 @@ function drawEdge(edge, graphics, lane_color=LANE_COLOR) {
         let pointB1 = pointB.moveAlong(pointBOffset, roadWidth);
 
         graphics.lineStyle(0);
-        graphics.beginFill(lane_color);
+        if($debugMode) graphics.beginFill(lane_color, 0.6);
+        else graphics.beginFill(lane_color);
 
         coords = coords.concat([pointA.x, pointA.y, pointB.x, pointB.y]);
         coords1 = coords1.concat([pointA1.y, pointA1.x, pointB1.y, pointB1.x]);
@@ -562,11 +563,11 @@ function drawEdge(edge, graphics, lane_color=LANE_COLOR) {
         graphics.hitArea = new PIXI.Polygon(coords);
         graphics.on("mouseover", function () {
             graphics.alpha = 0.5;
-            selectedEntity = edge.id;
+            $selectedEntity = edge.id;
         });
 
         graphics.on("mouseout", function () {
-            graphics.alpha = 1;
+            graphics.alpha = 0.6;
         });
     }
 }
@@ -760,16 +761,18 @@ Chart
         <div class="rect5"></div>
     </div>
     <div id="guide" class="ms-auto me-auto mt-5 alert alert-secondary  w-50" bind:this={guideDomElem}>
-        <h5>How to use this player</h5>
+        <h5>How to use the demonstrator</h5>
         <hr />
         <ul>
-            <li>Click <b>Roadnet File</b> to upload the roadnet log file(*.json)</li>
-            <li>Click <b>Replay File</b> to upload the replay file(*.txt)</li>
-            <li>(Optional) Click <b>Chart File</b> to upload the chart log file</li>
-            <li>Press the <b>Start</b> button to start replaying the simulation!</li>
-            <li>To restart, just press <b>Start</b> again</li>
-            <li>(*) The <b>debug</b> option enables displaying the ID of vehicles, roads and intersections during a mouse hover.
-                <b>This will cause a slower replaying</b>, so we suggest using it only for debugging purposes.</li>
+            <li>Select a <b>Scenario</b> and <b>Method</b></li>
+            <li>Add (upto three) other scenarios for side-by-side comparison! </li>
+            <li>(Experimental) Click <b>Heatmap</b> to visualize a color gradient on top* </li>
+            <li>Press the <b>Start</b> button to start replaying the scenarios </li>
+            <li>To restart, Reload the page (Ctrl/Cmd+R)</li>
+            <li>(*) The <b>heatmap</b> option is computation heavy
+                <b>and might cause a slower replaying.</b>
+                A legend of traffic density to color intensity will be shown on the bottom right.
+            </li> 
         </ul>
         <h5>Navigation Keys</h5>
         <hr />

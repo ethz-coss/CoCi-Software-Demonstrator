@@ -1,8 +1,8 @@
-## Demonstrator for Cityflow
+## Demonstrator for CoCi
 COSS ETHZ is building a software demonstrator on top of CityFlow to demo various traffic control algorithms.
 This repository contains the webapp code for that.
 1. A Flask server
-2. Static assets from CityFlow modified for COSS usecases
+2. Svelte app, see the set up documentation under svelte-app/README.md
 
 ### Running development server
 1. Create a virtual environtment and activate it
@@ -32,4 +32,4 @@ The [COSS server](https://serverinfo.inn.ac/) runs an Apache server to host all 
 // TO-DO add step by step details of deploying to production (certificates, exact configuration files)
 
 ### Live
-The app is currently deployed and can be viewed at https://demonstrator.inn.ac/static/index.html
+The app is currently deployed and can be viewed at https://demonstrator.inn.ac/

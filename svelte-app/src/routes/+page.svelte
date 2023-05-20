@@ -14,7 +14,7 @@
           humanity’s societal, sustainability, and governance challenges?
         </p>
         <p>
-          <span style="color:blue">[Q. Should we keep this paragraph?]</span> Starting from the paradigm of smart cities, we propose that the requirement of organizing
+          Starting from the paradigm of smart cities, we propose that the requirement of organizing
           societies in a more resilient way implies the need for more decentralized solutions, based
           on digitally-​assisted self-​​organization and that this concept is also compatible with
           sustainability requirements and stronger democratic participation.
