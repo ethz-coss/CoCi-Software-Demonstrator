@@ -6,7 +6,6 @@ import * as Viewport from 'pixi-viewport'
 import {onMount} from 'svelte';
 import * as utils from './utils.js';
 import {selectedParams, debugMode, controls, infoDOM, startSimulation, globalCount, selectedEntity} from './stores';
-
 export let id: number;
 
 const BACKGROUND_COLOR = 0xe8ebed;
@@ -100,6 +99,7 @@ const gradientArray = new Gradient()
 let ready = false;
 
 let roadnetData = [];
+let densityData = [];
 let replayData = [];
 
 async function downloadRoadnetFile(v, callback) {
@@ -120,11 +120,23 @@ async function downloadReplayFile(v, callback) {
     callback();
 }
 
+async function downloadDensityFile(v, callback) {
+    infoAppend("Downloading density..");
+    hideCanvas();
+    v[0] = await utils.getDensityFile($selectedParams[id].roadnetOption, $selectedParams[id].replayOption);
+    infoAppend("Finished downloading density!");
+    showCanvas();
+    callback();
+}
+
+let density = {};
+
 async function start() {
     if (loading) return;
     loading = true;
     infoReset();
     await downloadRoadnetFile(roadnetData, async function(){
+    await downloadDensityFile(densityData, async function(){
     await downloadReplayFile(replayData, function(){
         let after_update = async function() {
             infoAppend("Drawing roadnet");
@@ -133,6 +145,7 @@ async function start() {
             hideCanvas();
             try {
                 simulation = (roadnetData[0]);
+                density = densityData[0];
             } catch (e) {
                 infoAppend("Parsing roadnet file failed");
                 loading = false;
@@ -172,6 +185,7 @@ async function start() {
         after_update();
 
     }); // replay callback
+    }); // density callback
     }); // roadnet callback
 }
 
@@ -567,7 +581,7 @@ function drawEdge(edge, graphics, lane_color=LANE_COLOR) {
         });
 
         graphics.on("mouseout", function () {
-            graphics.alpha = 0.6;
+            graphics.alpha = 1;
         });
     }
 }
@@ -653,21 +667,21 @@ function drawStep(step: number) {
     carContainer.removeChildren();
     turnSignalContainer.removeChildren();
 
-    let roadToNumCars = {}
+    // let roadToNumCars = {}
     let carLog, position, length, width;
     for (let i = 0, len = carLogs.length - 1;i < len;++i) {
         carLog = carLogs[i].split(' ');
         position = transCoord([parseFloat(carLog[0]), parseFloat(carLog[1])]);
-        if($debugMode && step>0 && step%20 ==0) {
-            let roadId = getRoadIdOfCar(position)
-            if(roadId != null) {
-                if(roadToNumCars[roadId] != undefined) {
-                    roadToNumCars[roadId]++
-                } else {
-                    roadToNumCars[roadId]=0
-                }
-            }
-        }
+        // if($debugMode && step>0 && step%20 ==0) {
+        //     let roadId = getRoadIdOfCar(position)
+        //     if(roadId != null) {
+        //         if(roadToNumCars[roadId] != undefined) {
+        //             roadToNumCars[roadId]++
+        //         } else {
+        //             roadToNumCars[roadId]=0
+        //         }
+        //     }
+        // }
         length = parseFloat(carLog[5]);
         width = parseFloat(carLog[6]);
         carPool[i][0].position.set(position[0], position[1]);
@@ -688,27 +702,40 @@ function drawStep(step: number) {
         turnSignalContainer.addChild(carPool[i][1]);
     }
 
-    if ($debugMode && step>0 && step%20==0) {
-        //console.log("children", simulatorContainer.children)
-        //console.log("childByName", simulatorContainer.children[2].getChildByName("flow_5_3", true))
-        //console.log("childByNameRoad", simulatorContainer.children[0].getChildByName("road_2_1_1", true))
-        //console.log("roadToNumCars", roadToNumCars)
-        for (let roadId in roadToNumCars) {
-            let road = simulatorContainer.children[0].getChildByName(roadId, true)
-            // console.log("road from PIXI: ", road);
-            // road = edgeIdtoEdgeGraphics[roadId];
-            // console.log("road from my DS: ", road);
-            if (road) {
-                //console.log("#cars_on_road, #roads, #cars", roadToNumCars[roadId], Object.keys(roadToNumCars).length, carLogs.length)
-                let index = Math.ceil(roadToNumCars[roadId] * Object.keys(roadToNumCars).length * 100 / carLogs.length)
-                if (index > 99) index = 99
-                if (index < 0) index = 0
-                //console.log("index", index)
-                road.tint = parseInt(gradientArray[index].slice(1), 16)
-            }
-            // if (roadToNumCars[roadId] > 50) road.tint = 0xFF0000
-            // if (roadToNumCars[roadId] > 20 && roadToNumCars[roadId] <= 50) road.tint = 0x0000FF
-            // if (roadToNumCars[roadId] > 10 && roadToNumCars[roadId] <= 20) road.tint = 0x00FF00
+    // if ($debugMode && step>0 && step%20==0) {
+    //     //console.log("children", simulatorContainer.children)
+    //     //console.log("childByName", simulatorContainer.children[2].getChildByName("flow_5_3", true))
+    //     //console.log("childByNameRoad", simulatorContainer.children[0].getChildByName("road_2_1_1", true))
+    //     //console.log("roadToNumCars", roadToNumCars)
+    //     for (let roadId in roadToNumCars) {
+    //         let road = simulatorContainer.children[0].getChildByName(roadId, true)
+    //         // console.log("road from PIXI: ", road);
+    //         // road = edgeIdtoEdgeGraphics[roadId];
+    //         // console.log("road from my DS: ", road);
+    //         if (road) {
+    //             //console.log("#cars_on_road, #roads, #cars", roadToNumCars[roadId], Object.keys(roadToNumCars).length, carLogs.length)
+    //             let index = Math.ceil(roadToNumCars[roadId] * Object.keys(roadToNumCars).length * 100 / carLogs.length)
+    //             if (index > 99) index = 99
+    //             if (index < 0) index = 0
+    //             //console.log("index", index)
+    //             road.tint = parseInt(gradientArray[index].slice(1), 16)
+    //         }
+    //         // if (roadToNumCars[roadId] > 50) road.tint = 0xFF0000
+    //         // if (roadToNumCars[roadId] > 20 && roadToNumCars[roadId] <= 50) road.tint = 0x0000FF
+    //         // if (roadToNumCars[roadId] > 10 && roadToNumCars[roadId] <= 20) road.tint = 0x00FF00
+    //     }
+    // }
+
+    if($debugMode && step>0 && step%10==0) {
+        let numRoads = Object.keys(density).length 
+        for (let roadId in density) {
+            let road = simulatorContainer.children[0].getChildByName(roadId, true);
+            let index = Math.ceil(density[roadId][step] * numRoads * 100)
+            if (index > 99) index = 99
+            if (index < 0) index = 0
+            //console.log("index", index)
+            road.tint = parseInt(gradientArray[index].slice(1), 16)
+
         }
     }
 
@@ -722,7 +749,7 @@ function drawStep(step: number) {
     // }
 }
 
-function getRoadIdOfCar(position: number[]) {
+/*function getRoadIdOfCar(position: number[]) {
     position = transCoord(position)
     //console.log("position of car", position)
     for(let edgeId in edges_copy) {
@@ -743,7 +770,7 @@ function getRoadIdOfCar(position: number[]) {
         }
     }
     return null
-}
+}*/
 
 /*
 Chart
@@ -766,13 +793,9 @@ Chart
         <ul>
             <li>Select a <b>Scenario</b> and <b>Method</b></li>
             <li>Add (upto three) other scenarios for side-by-side comparison! </li>
-            <li>(Experimental) Click <b>Heatmap</b> to visualize a color gradient on top* </li>
+            <li>Click <b>Heatmap</b> to visualize a color gradient on top* </li>
             <li>Press the <b>Start</b> button to start replaying the scenarios </li>
             <li>To restart, Reload the page (Ctrl/Cmd+R)</li>
-            <li>(*) The <b>heatmap</b> option is computation heavy
-                <b>and might cause a slower replaying.</b>
-                A legend of traffic density to color intensity will be shown on the bottom right.
-            </li> 
         </ul>
         <h5>Navigation Keys</h5>
         <hr />

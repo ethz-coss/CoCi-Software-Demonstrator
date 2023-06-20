@@ -38,3 +38,11 @@ export async function getReplayFile(roadnetOption: string, replayOption: string)
     ///console.log("response was: " + resp);
     return resp;
 }
+
+export async function getDensityFile(roadnetOption: string, replayOption: string) {
+    const url = `${SERVER_URL}/get-density-file/${roadnetOption}/${replayOption}`;
+    const response = await fetch(url);
+    const resp = await response.json();
+    ///console.log("response was: " + resp);
+    return resp;
+}

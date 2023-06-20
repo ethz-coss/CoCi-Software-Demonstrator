@@ -1,12 +1,12 @@
 from flask import Flask, redirect, send_from_directory, url_for, render_template
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_cors import CORS
+#from flask_cors import CORS
 
 
 from data import Data
 
 app = Flask(__name__)
-CORS(app)
+#CORS(app)
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
@@ -35,5 +35,9 @@ def get_roadnet_file(option):
 @app.route('/get-replay-file/<roadnet_option>/<replay_option>')
 def get_replay_file(roadnet_option, replay_option):
     replay_file = data.get_replay_file(roadnet_option, replay_option)
-    #return send_from_directory('static', 'software_demonstrator_coci/' + replay_file, as_attachment=True)
     return redirect(url_for('static', filename='software_demonstrator_coci/' + replay_file))
+
+@app.route('/get-density-file/<roadnet_option>/<replay_option>')
+def get_density_file(roadnet_option, replay_option):
+    density_file = data.get_density_file(roadnet_option, replay_option)
+    return redirect(url_for('static', filename='software_demonstrator_coci/' + density_file))

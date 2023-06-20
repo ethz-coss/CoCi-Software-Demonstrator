@@ -119,7 +119,7 @@
 
         <div>
             <input type="checkbox" id="debug-mode"  bind:checked={$debugMode}/>
-            <label for="debug-mode">Heatmap (Experimental)</label>
+            <label for="debug-mode">Heatmap</label>
         </div>
         <div class="col-12 mt-3">
             <button class="btn btn-primary" id="start-btn" bind:this={startBtnDomElem}>Start</button>

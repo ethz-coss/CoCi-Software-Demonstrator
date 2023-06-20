@@ -9,32 +9,32 @@ class Data:
         }
         self.replay_options = {
             'NY48': {
-                'GuidedLight': 'ny48_hybrid.txt',
-                'PressLight' : 'ny48_presslight.txt',
-                'Analytic+' : 'ny48_analytical.txt',
-                'Demand' : 'ny48_demand.txt',
-                'Fixed' : 'ny48_fixed.txt'
+                'GuidedLight': 'ny48_hybrid',
+                'PressLight' : 'ny48_presslight',
+                'Analytic+' : 'ny48_analytical',
+                'Demand' : 'ny48_demand',
+                'Fixed' : 'ny48_fixed'
             },
             'Hangzhou': {
-                'GuidedLight': 'hangzhou_hybrid.txt',
-                'PressLight' : 'hangzhou_presslight.txt',
-                'Analytic+' : 'hangzhou_analytical.txt',
-                'Demand' : 'hangzhou_demand.txt',
-                'Fixed' : 'hangzhou_fixed.txt'
+                'GuidedLight': 'hangzhou_hybrid',
+                'PressLight' : 'hangzhou_presslight',
+                'Analytic+' : 'hangzhou_analytical',
+                'Demand' : 'hangzhou_demand',
+                'Fixed' : 'hangzhou_fixed'
             },
             '4x4': {
-                'GuidedLight': '4x4_hybrid.txt',
-                'PressLight' : '4x4_presslight.txt',
-                'Analytic+' : '4x4_analytical.txt',
-                'Demand' : '4x4_demand.txt',
-                'Fixed' : '4x4_fixed.txt'
+                'GuidedLight': '4x4_hybrid',
+                'PressLight' : '4x4_presslight',
+                'Analytic+' : '4x4_analytical',
+                'Demand' : '4x4_demand',
+                'Fixed' : '4x4_fixed'
             },
             '2x2': {
-                'GuidedLight': '2x2_hybrid.txt',
-                'PressLight' : '2x2_presslight.txt',
-                'Analytic+' : '2x2_analytical.txt',
-                'Demand' : '2x2_demand.txt',
-                'Fixed' : '2x2_fixed.txt'
+                'GuidedLight': '2x2_hybrid',
+                'PressLight' : '2x2_presslight',
+                'Analytic+' : '2x2_analytical',
+                'Demand' : '2x2_demand',
+                'Fixed' : '2x2_fixed'
             }
         }
     
@@ -48,4 +48,7 @@ class Data:
         return self.roadnet_options[roadnet_option]
 
     def get_replay_file(self, roadnet_option, replay_option):
-        return self.replay_options[roadnet_option][replay_option]
+        return self.replay_options[roadnet_option][replay_option] + '.txt'
+    
+    def get_density_file(self, roadnet_option, replay_option):
+        return self.replay_options[roadnet_option][replay_option] + '.json'
