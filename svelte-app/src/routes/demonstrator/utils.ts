@@ -1,5 +1,7 @@
-//const SERVER_URL = "http://127.0.0.1:5000";
-const SERVER_URL = "/api";
+import {dev} from "$app/environment";
+
+let SERVER_URL = "/api";
+if (dev) SERVER_URL = "http://127.0.0.1:5000";
 
 let roadnetOptions: string[];
 let replayOptions = {};
