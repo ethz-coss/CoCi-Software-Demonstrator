@@ -3,6 +3,12 @@ As a part of the [CoCi project](https://coss.ethz.ch/research/CoCi.html), COSS E
 This repository contains the server and frontend code for the project. This file explains the high level design and setup instructions.
 
 For information on extending and contributing to this project, read the [contribution guidelines](CONTRIBUTING.md).
+
+Table of contents:
+- [Design](#design)
+- [Setting up for development](#setting-up-for-development)
+- [Deploying to production](#deploying-to-production)
+- [Live instance](#live-instance)
 ## Design
 
 The app consists of a Python/Flask backend (a simple REST API, located in `app.py`) and a Svelte frontend (locate under `svelte-app/`). Moreover, the simulation files generated using CityFlow are stored on the server under `${SERVER_HOME}/static/software_demonstrator_coci/`.
@@ -65,5 +71,5 @@ Flask is not secure or performant enough to be used as a production server. Henc
 The [COSS server](https://serverinfo.inn.ac/) runs an Apache server to host all it's websites. Hence, we create an apache configuration for our app, and proxy API requests to the gunicorn instance
 // TO-DO add step by step details of deploying to production (certificates, exact configuration files)
 
-## Live
-The app is currently deployed and can be viewed at https://demonstrator.inn.ac/
+## Live instance
+The app is currently live at https://demonstrator.inn.ac/
