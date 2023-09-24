@@ -68,8 +68,8 @@ This setup assumes that the flask server is running on port `5000` on local as a
 ## Deploying to production
 Flask is not secure or performant enough to be used as a production server. Hence, we proxy the flask app by a [gunicorn](https://flask.palletsprojects.com/en/2.2.x/deploying/gunicorn/) server.
 
-The [COSS server](https://serverinfo.inn.ac/) runs an Apache server to host all it's websites. Hence, we create an apache configuration for our app, and proxy API requests to the gunicorn instance
-// TO-DO add step by step details of deploying to production (certificates, exact configuration files)
+[INTERNAL: these instructions are specific to our setup at COSS, and will need to be adapted depending on your infrastructure] The [COSS server](https://serverinfo.inn.ac/) runs an Apache server to host all it's websites. Hence, we create an apache configuration for our app (example configuration given in [demonstrator.inn.ac-le-ssl.conf](demonstrator.inn.ac-le-ssl.conf)), and proxy API requests to the gunicorn instance. The `ProxyPass /api http://127.0.0.1:8134/` directive tells apache to forward all requests to `/api` to the gunicorn server running on (non-exposed) port `8134` on the server.
+
 
 ## Live instance
 The app is currently live at https://demonstrator.inn.ac/
