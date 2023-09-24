@@ -1,12 +1,14 @@
-from flask import Flask, redirect, send_from_directory, url_for, render_template
+from flask import Flask, redirect, url_for, render_template
 from werkzeug.middleware.proxy_fix import ProxyFix
-#from flask_cors import CORS
+import os
 
 
 from data import Data
 
 app = Flask(__name__)
-#CORS(app)
+if os.environ.get('env') == 'development':
+    from flask_cors import CORS
+    CORS(app)
 
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1

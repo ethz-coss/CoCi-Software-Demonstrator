@@ -21,6 +21,10 @@
     let screenHeight = Viewport.Height - 50;
     let halfScreenHeight = Math.ceil(screenHeight/2);
     console.log("screenHeight", screenHeight);
+    $: {
+        $selectedParams = JSON.parse(JSON.stringify($selectedParams));
+        console.log('reassigning inside page')
+    }
 </script>
 <svelte:window on:keydown={handleKeydown}/>
 

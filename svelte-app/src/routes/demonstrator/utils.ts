@@ -27,22 +27,20 @@ export async function getReplayOptions(roadnetOption: string) {
 
 export async function getRoadnetFile(roadnetOption: string) {
     const url = `${SERVER_URL}/get-roadnet-file/${roadnetOption}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "force-cache" });
     return await response.json();
 }
 
 export async function getReplayFile(roadnetOption: string, replayOption: string) {
     const url = `${SERVER_URL}/get-replay-file/${roadnetOption}/${replayOption}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "force-cache" });
     const resp = await response.text();
-    ///console.log("response was: " + resp);
     return resp;
 }
 
 export async function getDensityFile(roadnetOption: string, replayOption: string) {
     const url = `${SERVER_URL}/get-density-file/${roadnetOption}/${replayOption}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "force-cache" });
     const resp = await response.json();
-    ///console.log("response was: " + resp);
     return resp;
 }

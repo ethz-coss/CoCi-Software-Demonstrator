@@ -5,7 +5,7 @@ import * as PIXI from 'pixi.js-legacy';
 import * as Viewport from 'pixi-viewport'
 import {onMount} from 'svelte';
 import * as utils from './utils.js';
-import {selectedParams, debugMode, controls, infoDOM, startSimulation, globalCount, selectedEntity} from './stores';
+import {selectedParams, debugMode, controls, infoDOM, startSimulation, globalCount, selectedEntity, numThreadsStarted} from './stores';
 export let id: number;
 
 const BACKGROUND_COLOR = 0xe8ebed;
@@ -130,8 +130,10 @@ async function downloadDensityFile(v, callback) {
 }
 
 let density = {};
+let isStarted = false;
 
 async function start() {
+    isStarted = true;
     if (loading) return;
     loading = true;
     infoReset();
@@ -189,6 +191,7 @@ async function start() {
     }); // roadnet callback
 }
 
+let isMounted = false;
 
 onMount(() => {
     function updateReplaySpeed(speed: number){
@@ -200,40 +203,16 @@ onMount(() => {
     updateReplaySpeed(0.5);
     initCanvas();
 
+    isMounted = true;
+
 });
 
 $: {
-    if ($startSimulation) {
+    if (isMounted && $startSimulation) {
         start();
     }
 }
 
-/*
-document.addEventListener('keydown', function(e) {
-    if (e.keyCode == P) {
-        controls.paused = !controls.paused;
-    } else if (e.keyCode == ONE) {
-        updateReplaySpeed(Math.max(controls.replaySpeed / 1.5, controls.replaySpeedMin));
-    } else if (e.keyCode == TWO ) {
-        updateReplaySpeed(Math.min(controls.replaySpeed * 1.5, controls.replaySpeedMax));
-    } else if (e.keyCode == LEFT_BRACKET) {
-        cnt = (cnt - 1) % totalStep;
-        cnt = (cnt + totalStep) % totalStep;
-        drawStep(cnt);
-    } else if (e.keyCode == RIGHT_BRACKET) {
-        cnt = (cnt + 1) % totalStep;
-        drawStep(cnt);
-    } else {
-        keyDown.add(e.keyCode)
-    }
-});
-
-document.addEventListener('keyup', (e) => keyDown.delete(e.keyCode));
-
-nodeCanvas.addEventListener('dblclick', function(e){
-    controls.paused = !controls.paused;
-});
-*/
 
 function initCanvas() {
     app = new PIXI.Application({
@@ -608,7 +587,7 @@ function run(delta) {
             if (frameElapsed >= (1 / $controls.replaySpeed ** 2)) {
                 //cnt += 1;
                 globalCount.tryIncrement(id);
-                console.log(`[${id}]: step: `, cnt, $globalCount);
+                //console.log(`[${id}]: step: `, cnt, $globalCount);
                 if ($globalCount != cnt) {  // if every thread has arrived, increase my count too
                     cnt = $globalCount
                     frameElapsed = 0;
@@ -667,21 +646,10 @@ function drawStep(step: number) {
     carContainer.removeChildren();
     turnSignalContainer.removeChildren();
 
-    // let roadToNumCars = {}
     let carLog, position, length, width;
     for (let i = 0, len = carLogs.length - 1;i < len;++i) {
         carLog = carLogs[i].split(' ');
         position = transCoord([parseFloat(carLog[0]), parseFloat(carLog[1])]);
-        // if($debugMode && step>0 && step%20 ==0) {
-        //     let roadId = getRoadIdOfCar(position)
-        //     if(roadId != null) {
-        //         if(roadToNumCars[roadId] != undefined) {
-        //             roadToNumCars[roadId]++
-        //         } else {
-        //             roadToNumCars[roadId]=0
-        //         }
-        //     }
-        // }
         length = parseFloat(carLog[5]);
         width = parseFloat(carLog[6]);
         carPool[i][0].position.set(position[0], position[1]);
@@ -701,30 +669,6 @@ function drawStep(step: number) {
         carPool[i][1].height = width;
         turnSignalContainer.addChild(carPool[i][1]);
     }
-
-    // if ($debugMode && step>0 && step%20==0) {
-    //     //console.log("children", simulatorContainer.children)
-    //     //console.log("childByName", simulatorContainer.children[2].getChildByName("flow_5_3", true))
-    //     //console.log("childByNameRoad", simulatorContainer.children[0].getChildByName("road_2_1_1", true))
-    //     //console.log("roadToNumCars", roadToNumCars)
-    //     for (let roadId in roadToNumCars) {
-    //         let road = simulatorContainer.children[0].getChildByName(roadId, true)
-    //         // console.log("road from PIXI: ", road);
-    //         // road = edgeIdtoEdgeGraphics[roadId];
-    //         // console.log("road from my DS: ", road);
-    //         if (road) {
-    //             //console.log("#cars_on_road, #roads, #cars", roadToNumCars[roadId], Object.keys(roadToNumCars).length, carLogs.length)
-    //             let index = Math.ceil(roadToNumCars[roadId] * Object.keys(roadToNumCars).length * 100 / carLogs.length)
-    //             if (index > 99) index = 99
-    //             if (index < 0) index = 0
-    //             //console.log("index", index)
-    //             road.tint = parseInt(gradientArray[index].slice(1), 16)
-    //         }
-    //         // if (roadToNumCars[roadId] > 50) road.tint = 0xFF0000
-    //         // if (roadToNumCars[roadId] > 20 && roadToNumCars[roadId] <= 50) road.tint = 0x0000FF
-    //         // if (roadToNumCars[roadId] > 10 && roadToNumCars[roadId] <= 20) road.tint = 0x00FF00
-    //     }
-    // }
 
     if($debugMode && step>0 && step%10==0) {
         let numRoads = Object.keys(density).length 
@@ -748,29 +692,6 @@ function drawStep(step: number) {
     //     nodeStats.innerText = stats[step][0].toFixed(2);
     // }
 }
-
-/*function getRoadIdOfCar(position: number[]) {
-    position = transCoord(position)
-    //console.log("position of car", position)
-    for(let edgeId in edges_copy) {
-        let road = edges_copy[edgeId]
-        for (let i=0; i<road.points.length-1; i++) {
-            let endpoint1 = transCoord([road.points[i].x, road.points[i].y])
-            let endpoint2 = transCoord([road.points[i+1].x, road.points[i+1].y])
-            //console.log("checking if car is in ", endpoint1, "and", endpoint2)
-            let width = 6
-            if(position[0] >= endpoint1[0]-width && position[0] <= endpoint2[0]+width && position[1] >= endpoint1[1]-width && position[1] <= endpoint2[1]+width) {
-                //console.log("found!")
-                return road.id
-            }
-            if(position[0] <= endpoint1[0]+width && position[0] >= endpoint2[0]-width && position[1] <= endpoint1[1]+width && position[1] >= endpoint2[1]-width) {
-                //console.log("found!")
-                return road.id
-            }
-        }
-    }
-    return null
-}*/
 
 /*
 Chart
@@ -813,7 +734,6 @@ Chart
                 <span class="badge bg-secondary">[</span>
             </li>
         </ul>
-
     </div>
 </div>
 

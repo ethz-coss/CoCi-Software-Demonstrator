@@ -1,7 +1,7 @@
 <script lang="ts">
     import * as utils from './utils';
     import {onMount} from 'svelte';
-    import {controls, debugMode, selectedParams, infoDOM, startSimulation, globalCount} from './stores';
+    import {controls, debugMode, selectedParams, infoDOM, startSimulation, globalCount, numThreadsStarted} from './stores';
 
     let pauseButton: HTMLButtonElement;
     let replayControlDom: HTMLInputElement;
@@ -19,7 +19,9 @@
         /// create children and pass message to children containing simulation params
         //$syncCount = new SynchronizedCounter($selectedParams.length);
         globalCount.setNumThreads($selectedParams.length);
+        $selectedParams = JSON.parse(JSON.stringify($selectedParams));
         $startSimulation = true;
+        $numThreadsStarted = $selectedParams.length;
     }
 
     function clearSelect(selectElem: HTMLSelectElement | null) {
@@ -29,6 +31,7 @@
     }
 
     async function addScenario() {
+        if($startSimulation) $startSimulation = false;
         let roadnetOptions = await utils.getRoadnetOptions();
         let replayOptions = await utils.getReplayOptions(roadnetOptions[0]);
         roadnetOptionsList = [...roadnetOptionsList, roadnetOptions];
@@ -96,14 +99,17 @@
         <div class="border-bottom pb-2">
             <label for="roadnet">Select Scenario</label>
 
-            <select class="form-select" id="roadnet" bind:value={$selectedParams[i].roadnetOption} on:change={() => onRoadnetOptionChange(i)}>
+            <select class="form-select" id="roadnet" bind:value={$selectedParams[i].roadnetOption} 
+                on:change={() => onRoadnetOptionChange(i)}
+                disabled={i < $numThreadsStarted}>
                 {#each roadnetOptionsList[i] as opt}
                     <option value={opt}>{opt}</option>
                 {/each}
             </select>
             
             <label for="flow">Select Method</label>
-            <select class="form-select" id="flow" bind:value={$selectedParams[i].replayOption}>
+            <select class="form-select" id="flow" bind:value={$selectedParams[i].replayOption}
+                disabled={i < $numThreadsStarted}>
                 {#each replayOptionsForRoadnetOptionList[i] as opt}
                     <option value={opt}>{opt}</option>
                 {/each}
@@ -118,11 +124,14 @@
         </div>
 
         <div>
-            <input type="checkbox" id="debug-mode"  bind:checked={$debugMode}/>
+            <input type="checkbox" id="debug-mode"  bind:checked={$debugMode}
+                disabled={$numThreadsStarted > 0}/>
             <label for="debug-mode">Heatmap</label>
         </div>
         <div class="col-12 mt-3">
-            <button class="btn btn-primary" id="start-btn" bind:this={startBtnDomElem}>Start</button>
+            <button class="btn btn-primary" id="start-btn" 
+            bind:this={startBtnDomElem}
+            disabled={$numThreadsStarted == 4}>Start</button>
         </div>
     </div>
 </div>
@@ -140,8 +149,8 @@
         <div class="col-2 text-center">
             <span class="fas fa-minus" id="slow-btn" style="cursor: pointer" bind:this={slowBtnDomElem}></span>
         </div>
-        <div class="col-7">
-            <input type="range" class="custom-range" id="replay-control" bind:this={replayControlDom}>
+        <div class="col-8 text-center">
+            <input type="range" class="w-100" id="replay-control" bind:this={replayControlDom}>
         </div>
         <div class="col-2 text-center">
             <span class="fas fa-plus" id="fast-btn" style="cursor: pointer" bind:this={fastBtnDomElem}></span>
